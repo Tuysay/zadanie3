@@ -1,3 +1,105 @@
 body {
-    background-color: beige;
+    background-color: #f4ede6;
+    font-family: 'Roboto', sans-serif;
+}
+
+
+.col {
+    margin: 10px;
+    width: 300px;
+    padding: 20px;
+    background-color: #fff;
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.row-col {
+    display: flex;
+    justify-content: space-around;
+}
+
+
+.forms-create-card {
+    margin: 10px;
+    padding: 20px;
+    background-color: #fff;
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.text-form-card {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.column {
+    border: 2px solid #d4af37;
+    margin: 10px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.cardOne {
+    background-color: #fff;
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+button {
+    background-color: #d4af37;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #b39025;
+}
+
+
+input {
+    border: 1px solid #d4af37;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+textarea {
+    border: 1px solid #d4af37;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    height: 50px;
+    resize: none;
+}
+
+input:focus {
+    outline: none;
+    border-color: #b39025;
+}
+.peremestit{
+    margin-bottom: 8px;
+}
+
+.peremestit {
+    margin-bottom: 8px;
 }

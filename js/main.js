@@ -217,7 +217,7 @@ Vue.component('card-edit', {
                     <textarea v-model="editedTask" :placeholder="card.task"></textarea>
                     <p>Дэдлайн: {{ card.deadline }}</p>
                     <p>Дата создания: {{ card.dateCreate }}</p>
-                    <button type="button" @click="saveEdit">Yes</button>
+                    <button type="button" @click="saveEdit">Yes</button><br>
                     <button type="button" @click="toggleEdit">No</button>
                 </form>
             </div>
@@ -253,9 +253,9 @@ Vue.component('card-form', {
     template: `
             <div class="cardOne">
                 <div v-if="!edit">
-                    <p>{{ card.title }}</p>
+                    <p>{{ card.title }}</p> 
                     <p>{{ card.task }}</p>
-                    <p>Deadline:{{ card.deadline }}</p>
+                    <p>Дедлайн:{{ card.deadline }}</p>
                     <p v-if="card.dateEdit != null">Редактирование: {{ card.dateEdit }}</p>
                     <p v-if="last != true && card.reason.length > 0 "></p>
                     <ul >
@@ -263,12 +263,12 @@ Vue.component('card-form', {
                     </ul>
                     <p>Дата создания:{{card.dateCreate}}</p>
                     <p v-if="card.completed != null">Карточка:  {{ card.completed ? 'Просрочен' : 'Выполнен' }}</p>
-                    <button type="button" @click="moveCard"  v-if="card.completed === null">
+                    <button class="peremestit" type="button" @click="moveCard"  v-if="card.completed === null">
                         Переместить
                     </button>
-                    <button type="button" v-if="del" @click="deleteCard">Удалить</button> <!-- кнопка удаления -->
+                    <button class="peremestit" type="button" v-if="del" @click="deleteCard">Удалить</button> <!-- кнопка удаления -->
                     <template v-if="showReturnButton">
-                        <button type="button" @click="returnCard" :disabled="!reason">Вернуть</button>
+                        <button class="peremestit" type="button" @click="returnCard" :disabled="!reason">Вернуть</button>
                         <input type="text" v-model="reason" placeholder="Введите причину возврата" />
                     </template>
                     <template v-if="showAddReason">
