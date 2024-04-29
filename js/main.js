@@ -43,7 +43,7 @@ Vue.component('columns', {
             this.cardsTwo.push(card);
             this.deleteCard(card, this.cardsThree);
             if (!card.hasOwnProperty('reason')) {
-                this.$set(card, 'reason', []); // Initialize the reason array if it's not defined
+                this.$set(card, 'reason', []); 
             }
             card.reason.push(reason);
         },
@@ -288,14 +288,14 @@ Vue.component('card-form', {
         edit: Boolean,
         last: Boolean,
         del: Boolean,
-        column: Number, // Add a prop to pass the column number
+        column: Number, 
     },
     computed: {
         showReturnButton() {
-            return !this.edit && this.card.completed === null && this.column === 3; // Only show in column 3
+            return !this.edit && this.card.completed === null && this.column === 3; 
         },
         showAddReason() {
-            return this.last && this.card.completed === null && this.column === 3; // Only show in column 3
+            return this.last && this.card.completed === null && this.column === 3; 
         }
     },
     methods: {
@@ -311,7 +311,7 @@ Vue.component('card-form', {
         returnCard() {
             if (this.reason) {
                 this.$emit('return-card', this.card, this.reason);
-                this.reason = ''; // Очистить поле причины после возврата
+                this.reason = '';
             }
         }
     }
