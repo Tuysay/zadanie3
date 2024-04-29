@@ -5,8 +5,8 @@ Vue.component('columns', {
                 <create-card @card-submitted="addCard"></create-card>
                 <column-planned-tasks :cardList="cardsOne" @move-to-two="moveToTwo" @delete-card="deleteCard"></column-planned-tasks>
                 <column-tasks-work :cardList="cardsTwo" @move-to-three="moveToThree"></column-tasks-work>
-                <column-testing :cardList="cardsThree" @move-to-four="moveToFour" @move-last-card="moveLastCard"></column-testing>
-                <column-completed-tasks :cardList="cardsFour" @return-to-one="returnToOne"></column-completed-tasks>
+                <column-testing :cardList="cardsThree" @move-to-four="moveToFour" @move-to-two="moveToTwo"></column-testing>
+                <column-completed-tasks :cardList="cardsFour"></column-completed-tasks>
             </div>
         </div>
     `,
@@ -31,16 +31,12 @@ Vue.component('columns', {
             this.deleteCard(card, this.cardsTwo);
         },
         moveToFour(card) {
+            card.completed = true;
             this.cardsFour.push(card);
             this.deleteCard(card, this.cardsThree);
         },
         moveLastCard(card) {
             this.cardsTwo.push(card);
-            this.deleteCard(card, this.cardsFour);
-        },
-        returnToOne(card, reason) {
-            this.cardsOne.push(card);
-            card.reason.push(reason);
             this.deleteCard(card, this.cardsFour);
         },
         deleteCard(card, list) {
@@ -208,7 +204,6 @@ Vue.component('card-form', {
                 </add-reason>
             </div>
             <card-edit v-if="card.completed === null" :card="card"></card-edit>
-            <return-reason v-if="card.completed === true" :card="card" @return-reason="returnReason"></return-reason>
         </div>
     `,
     props: {
@@ -226,9 +221,6 @@ Vue.component('card-form', {
         },
         addReason(reason) {
             this.card.reason.push(reason);
-        },
-        returnReason(reason) {
-            this.$emit('return-reason', reason);
         }
     }
 });
