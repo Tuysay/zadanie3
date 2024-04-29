@@ -3,10 +3,10 @@ Vue.component('columns', {
         <div class="list-notes">
             <div class="row-col">
                 <create-card @card-submitted="addCard"></create-card>
-<column-planned-tasks :cardList="cardsOne" @move-to-two="moveToTwo" @delete-card="card => deleteCard(card, cardsOne)"></column-planned-tasks>
+                <column-planned-tasks :cardList="cardsOne" @move-to-two="moveToTwo" @delete-card="deleteCard"></column-planned-tasks>
                 <column-tasks-work :cardList="cardsTwo" @move-to-three="moveToThree"></column-tasks-work>
-                <column-testing :cardList="cardsThree" @move-to-four="moveToFour"></column-testing>
-                <column-completed-tasks :cardList="cardsFour"></column-completed-tasks>
+                <column-testing :cardList="cardsThree" @move-to-four="moveToFour" @move-last-card="moveLastCard"></column-testing>
+                <column-completed-tasks :cardList="cardsFour" @return-to-one="returnToOne"></column-completed-tasks>
             </div>
         </div>
     `,
@@ -22,7 +22,27 @@ Vue.component('columns', {
         addCard(card) {
             this.cardsOne.push(card);
         },
-
+        moveToTwo(card) {
+            this.cardsTwo.push(card);
+            this.deleteCard(card, this.cardsOne);
+        },
+        moveToThree(card) {
+            this.cardsThree.push(card);
+            this.deleteCard(card, this.cardsTwo);
+        },
+        moveToFour(card) {
+            this.cardsFour.push(card);
+            this.deleteCard(card, this.cardsThree);
+        },
+        moveLastCard(card) {
+            this.cardsTwo.push(card);
+            this.deleteCard(card, this.cardsFour);
+        },
+        returnToOne(card, reason) {
+            this.cardsOne.push(card);
+            card.reason.push(reason);
+            this.deleteCard(card, this.cardsFour);
+        },
         deleteCard(card, list) {
             const index = list.indexOf(card);
             if (index !== -1) {
@@ -34,39 +54,35 @@ Vue.component('columns', {
 
 Vue.component('column-planned-tasks', {
     props: {
-        card: Object,
-        edit: Boolean,
-        last: Boolean,
-        del: Boolean,
+        cardList: Array,
     },
     template: `
     <div class="col">
-        <card-form class="column"
+        <card-form
+            class="column"
             v-for="card in cardList"
             :key="card.title"
             :card="card"
             @move-card="moveCard"
             @delete-card="deleteCard"
-            @return-card="returnCard">
+            :del="true">
         </card-form>
     </div>
     `,
-
     methods: {
-        moveCard() {
-            this.$emit('move-card', this.card);
+        moveCard(card) {
+            this.$emit('move-to-two', card);
         },
-        deleteCard() {
-            this.$emit('delete-card', this.card);
-        },
-
+        deleteCard(card) {
+            this.$emit('delete-card', card, this.cardList);
+        }
     }
 });
 
 
 Vue.component('column-tasks-work', {
     props: {
-        cardList: [],
+        cardList: Array,
     },
     template: `
     <div class="col">
@@ -87,7 +103,7 @@ Vue.component('column-tasks-work', {
 
 Vue.component('column-testing', {
     props: {
-        cardList: [],
+        cardList: Array,
     },
     template: `
     <div class="col">
@@ -105,14 +121,14 @@ Vue.component('column-testing', {
             this.$emit('move-to-four', card);
         },
         moveLastCard(card) {
-            this.$emit('move-to-two', card);
+            this.$emit('move-last-card', card);
         }
     }
 })
 
 Vue.component('column-completed-tasks', {
     props: {
-        cardList: [],
+        cardList: Array,
     },
     template: `
     <div class="col">
@@ -128,7 +144,7 @@ Vue.component('column-completed-tasks', {
 Vue.component('card-edit', {
     template: `
     <div class="cardOne">
-    <button type="button" v-if="!show" @click="toggleEdit">Редактирование</button>
+        <button type="button" v-if="!show" @click="toggleEdit">Редактирование</button>
         <form class="text-form-card" v-if="show">
             <label for="title">Редактирование</label>
             <input v-model="editedTitle" id="title" type="text" :placeholder="card.title">
@@ -143,7 +159,28 @@ Vue.component('card-edit', {
     props: {
         card: Object,
     },
-
+    data() {
+        return {
+            show: false,
+            editedTitle: this.card.title,
+            editedTask: this.card.task,
+        }
+    },
+    methods: {
+        toggleEdit() {
+            this.show = !this.show;
+        },
+        saveEdit() {
+            if (this.editedTitle !== "") {
+                this.card.title = this.editedTitle;
+            }
+            if (this.editedTask !== "") {
+                this.card.task = this.editedTask;
+            }
+            this.card.dateEdit = new Date().toLocaleString();
+            this.show = false;
+        }
+    }
 });
 
 Vue.component('card-form', {
@@ -171,9 +208,15 @@ Vue.component('card-form', {
                 </add-reason>
             </div>
             <card-edit v-if="card.completed === null" :card="card"></card-edit>
+            <return-reason v-if="card.completed === true" :card="card" @return-reason="returnReason"></return-reason>
         </div>
     `,
-
+    props: {
+        card: Object,
+        edit: Boolean,
+        last: Boolean,
+        del: Boolean,
+    },
     methods: {
         moveCard() {
             this.$emit('move-card', this.card);
@@ -181,7 +224,12 @@ Vue.component('card-form', {
         deleteCard() {
             this.$emit('delete-card', this.card);
         },
-
+        addReason(reason) {
+            this.card.reason.push(reason);
+        },
+        returnReason(reason) {
+            this.$emit('return-reason', reason);
+        }
     }
 });
 
@@ -195,10 +243,37 @@ Vue.component('add-reason', {
     props: {
         card: Object,
     },
-
+    data() {
+        return {
+            reason: ""
+        }
+    },
     methods: {
         submitReason() {
             this.$emit('add-reason', this.reason);
+            this.reason = "";
+        }
+    }
+});
+
+Vue.component('return-reason', {
+    template: `
+    <form class="text-form-card" @submit.prevent="submitReason">
+        <textarea v-model="reason" ></textarea>
+        <button type="submit" :disabled="!reason">Вернуть</button>
+    </form>
+    `,
+    props: {
+        card: Object,
+    },
+    data() {
+        return {
+            reason: ""
+        }
+    },
+    methods: {
+        submitReason() {
+            this.$emit('return-reason', this.reason);
             this.reason = "";
         }
     }
@@ -221,8 +296,38 @@ Vue.component('create-card', {
         </form>
     </div>
     `,
+    data() {
+        return {
+            title: null,
+            task: null,
+            deadline: null,
+            errors: []
+        }
+    },
+    methods: {
+        onSubmit() {
+            if (this.title && this.task && this.deadline) {
+                let card = {
+                    title: this.title,
+                    task: this.task,
+                    deadline: this.deadline,
+                    dateCreate: new Date().toLocaleString(),
+                    reason: [],
+                    completed: null,
+                }
+                this.$emit('card-submitted', card);
 
-
+                this.title = null
+                this.task = null
+                this.deadline = null
+            } else {
+                this.errors = [];
+                if (!this.title) this.errors.push("Заполните заголовок!")
+                if (!this.task) this.errors.push("Заполните описание задачи!")
+                if (!this.deadline) this.errors.push("Выберите дедлайн!")
+            }
+        }
+    }
 });
 
 
@@ -240,7 +345,23 @@ let app = new Vue({
         addCard(card) {
             this.cardsOne.push(card);
         },
-
+        moveToTwo(card) {
+            this.cardsTwo.push(card);
+            this.deleteCard(card, this.cardsOne);
+        },
+        returnToOne(card, reason) {
+            this.cardsOne.push(card);
+            card.reason.push(reason);
+            this.deleteCard(card, this.cardsFour);
+        },
+        moveToThree(card) {
+            this.cardsThree.push(card);
+            this.deleteCard(card, this.cardsTwo);
+        },
+        moveToFour(card) {
+            this.cardsFour.push(card);
+            this.deleteCard(card, this.cardsThree);
+        },
         deleteCard(card, list) {
             const index = list.indexOf(card);
             if (index !== -1) {
