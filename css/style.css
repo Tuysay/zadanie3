@@ -103,3 +103,8 @@ input:focus {
 .peremestit {
     margin-bottom: 8px;
 }
+
+.strike-through  {
+    text-decoration: line-through;
+    text-decoration-color: red
+}

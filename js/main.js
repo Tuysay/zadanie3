@@ -1,14 +1,14 @@
 Vue.component('columns', {
     template: `
-                <div class="list-notes">
-                    <div class="row-col">
-                        <create-card @card-submitted="addCard"></create-card>
-                        <column-planned-tasks :cardList="cardsOne" @move-to-two="moveToTwo" @delete-card="deleteCard"></column-planned-tasks>
-                        <column-tasks-work :cardList="cardsTwo" @move-to-three="moveToThree"></column-tasks-work>
-                        <column-testing :cardList="cardsThree" @move-to-four="moveToFour" @move-to-two="moveToTwo" @return-to-two="returnToTwo"></column-testing>
-                        <column-completed-tasks :cardList="cardsFour"></column-completed-tasks>
-                    </div>
-                </div>
+    <div class="list-notes">
+      <div class="row-col">
+        <create-card @card-submitted="addCard" @update-deadlines="updateDeadlines"></create-card>
+        <column-planned-tasks :cardList="cardsOne" @move-to-two="moveToTwo" @delete-card="deleteCard"></column-planned-tasks>
+        <column-tasks-work :cardList="cardsTwo" @move-to-three="moveToThree"></column-tasks-work>
+        <column-testing :cardList="cardsThree" @move-to-four="moveToFour" @move-to-two="moveToTwo" @return-to-two="returnToTwo"></column-testing>
+        <column-completed-tasks :cardList="cardsFour"></column-completed-tasks>
+      </div>
+    </div>
             `,
     data() {
         return {
@@ -47,12 +47,18 @@ Vue.component('columns', {
             }
             card.reason.push(reason);
         },
+        updateDeadlines(deadline) {
+            this.cardsOne.forEach(card => card.deadline = deadline);
+            this.cardsTwo.forEach(card => card.deadline = deadline);
+            this.cardsThree.forEach(card => card.deadline = deadline);
+        },
         deleteCard(card, list) {
             const index = list.indexOf(card);
             if (index !== -1) {
                 list.splice(index, 1);
             }
-        }
+        },
+
     }
 });
 
@@ -71,7 +77,13 @@ Vue.component('create-card', {
                         </ul>
                     </p>
                 </form>
+                
+            <br><div>
+                <input v-model="deadline" type="date">
+            <button type="submit" @click="updateDeadlines">изменить дедлайн</button>
             </div>
+            </div>
+            
             `,
     data() {
         return {
@@ -103,6 +115,9 @@ Vue.component('create-card', {
                 if (!this.task) this.errors.push("Заполните описание задачи!")
                 if (!this.deadline) this.errors.push("Выберите дедлайн!")
             }
+        },
+        updateDeadlines() {
+            this.$emit('update-deadlines', this.deadline);
         }
     }
 });
@@ -206,6 +221,8 @@ Vue.component('column-completed-tasks', {
             </div>
             `,
 });
+
+
 
 Vue.component('card-edit', {
     template: `
