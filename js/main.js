@@ -19,7 +19,7 @@ Vue.component('columns', {
             cardsTwo: [],
             cardsThree: [],
             cardsFour: [],
-            clickedReason: null  // добавляем переменную для хранения выбранной причины возврата
+            clickedReason: null  
         }
     },
     methods: {
@@ -146,7 +146,7 @@ Vue.component('column-planned-tasks', {
                     @move-card="moveCard"
                     @delete-card="deleteCard"
                     :del="true"
-                    :column="1"> <!-- Pass the column number -->
+                    :column="1"> 
                 </card-form>
             </div>
             `,
@@ -172,7 +172,7 @@ Vue.component('column-tasks-work', {
                 :key="card.title"
                 :card="card"
                 @move-card="moveCard"
-                :column="2"> <!-- Pass the column number -->
+                :column="2"> 
             </card-form>
         </div>
     `,
@@ -203,7 +203,7 @@ Vue.component('column-testing', {
                     @move-card="moveCard"
                     @move-last-card="moveLastCard"
                     @return-card="returnToTwo"
-                    :column="3"> <!-- Pass the column number -->
+                    :column="3">
                 </card-form>
             </div>
             `,
