@@ -1,14 +1,14 @@
 Vue.component('columns', {
     template: `
-                <div class="list-notes">
-                    <div class="row-col">
-                        <create-card @card-submitted="addCard"></create-card>
-                        <column-planned-tasks :cardList="cardsOne" @move-to-two="moveToTwo" @delete-card="deleteCard"></column-planned-tasks>
-                        <column-tasks-work :cardList="cardsTwo" @move-to-three="moveToThree"></column-tasks-work>
-                        <column-testing :cardList="cardsThree" @move-to-four="moveToFour" @move-to-two="moveToTwo" @return-to-two="returnToTwo"></column-testing>
-                        <column-completed-tasks :cardList="cardsFour"></column-completed-tasks>
-                    </div>
-                </div>
+    <div class="list-notes">
+      <div class="row-col">
+        <create-card @card-submitted="addCard" @update-deadlines="updateDeadlines"></create-card>
+        <column-planned-tasks :cardList="cardsOne" @move-to-two="moveToTwo" @delete-card="deleteCard"></column-planned-tasks>
+        <column-tasks-work :cardList="cardsTwo" @move-to-three="moveToThree"></column-tasks-work>
+        <column-testing :cardList="cardsThree" @move-to-four="moveToFour" @move-to-two="moveToTwo" @return-to-two="returnToTwo"></column-testing>
+        <column-completed-tasks :cardList="cardsFour"></column-completed-tasks>
+      </div>
+    </div>
             `,
     data() {
         return {
@@ -43,16 +43,22 @@ Vue.component('columns', {
             this.cardsTwo.push(card);
             this.deleteCard(card, this.cardsThree);
             if (!card.hasOwnProperty('reason')) {
-                this.$set(card, 'reason', []); 
+                this.$set(card, 'reason', []);
             }
             card.reason.push(reason);
+        },
+        updateDeadlines(deadline) {
+            this.cardsOne.forEach(card => card.deadline = deadline);
+            this.cardsTwo.forEach(card => card.deadline = deadline);
+            this.cardsThree.forEach(card => card.deadline = deadline);
         },
         deleteCard(card, list) {
             const index = list.indexOf(card);
             if (index !== -1) {
                 list.splice(index, 1);
             }
-        }
+        },
+
     }
 });
 
@@ -71,7 +77,13 @@ Vue.component('create-card', {
                         </ul>
                     </p>
                 </form>
+
+            <br><div>
+                <input v-model="deadline" type="date">
+            <button type="submit" @click="updateDeadlines">изменить дедлайн</button>
             </div>
+            </div>
+
             `,
     data() {
         return {
@@ -103,6 +115,9 @@ Vue.component('create-card', {
                 if (!this.task) this.errors.push("Заполните описание задачи!")
                 if (!this.deadline) this.errors.push("Выберите дедлайн!")
             }
+        },
+        updateDeadlines() {
+            this.$emit('update-deadlines', this.deadline);
         }
     }
 });
@@ -158,6 +173,7 @@ Vue.component('column-tasks-work', {
     }
 })
 
+
 Vue.component('column-testing', {
     props: {
         cardList: Array,
@@ -207,6 +223,8 @@ Vue.component('column-completed-tasks', {
             `,
 });
 
+
+
 Vue.component('card-edit', {
     template: `
             <div class="cardOne">
@@ -248,39 +266,41 @@ Vue.component('card-edit', {
         }
     }
 });
-
 Vue.component('card-form', {
     template: `
-            <div class="cardOne">
-                <div v-if="!edit">
-                    <p>{{ card.title }}</p> 
-                    <p>{{ card.task }}</p>
-                    <p>Дедлайн:{{ card.deadline }}</p>
-                    <p v-if="card.dateEdit != null">Редактирование: {{ card.dateEdit }}</p>
-                    <p v-if="last != true && card.reason.length > 0 "></p>
-                    <ul >
-                        <li v-for="reas in card.reason">{{ reas }}</li>
-                    </ul>
-                    <p>Дата создания:{{card.dateCreate}}</p>
-                    <p v-if="card.completed != null">Карточка:  {{ card.completed ? 'Просрочен' : 'Выполнен' }}</p>
-                    <button class="peremestit" type="button" @click="moveCard"  v-if="card.completed === null">
-                        Переместить
-                    </button>
-                    <button class="peremestit" type="button" v-if="del" @click="deleteCard">Удалить</button> <!-- кнопка удаления -->
-                    <template v-if="showReturnButton">
-                        <button class="peremestit" type="button" @click="returnCard" :disabled="!reason">Вернуть</button>
-                        <input type="text" v-model="reason" placeholder="Введите причину возврата" />
-                    </template>
-                    <template v-if="showAddReason">
-                        <add-reason :card="card" @add-reason="addReason"></add-reason>
-                    </template>
-                </div>
-                <card-edit v-if="card.completed === null" :card="card"></card-edit>
-            </div>
-            `,
+    <div class="cardOne">
+      <div v-if="!edit">
+        <p>{{ card.title }}</p>
+        <p>{{ card.task }}</p>
+        <p>Дедлайн:{{ card.deadline }}</p>
+        <p v-if="card.dateEdit != null">Редактирование: {{ card.dateEdit }}</p>
+        <p v-if="last != true && card.reason.length  > 0" >
+          <span v-for="reas in card.reason" :class="{ 'strike-through': clickedReason === reas }" @click="toggleReason(reas)">{{ reas }}</span>
+        </p>
+<!--        <ul>-->
+<!--          <li v-for="reas in card.reason" :class="{ 'strike-through': clickedReason === reas }" @click="toggleReason(reas)">{{ reas }}</li>-->
+<!--        </ul>-->
+        <p>Дата создания:{{card.dateCreate}}</p>
+        <p v-if="card.completed != null">Карточка:  {{ card.completed ? 'Просрочен' : 'Выполнен' }}</p>
+        <button class="peremestit" type="button" @click="moveCard" v-if="card.completed === null">
+          Переместить
+        </button>
+        <button class="peremestit" type="button" v-if="del" @click="deleteCard">Удалить</button>
+        <template v-if="showReturnButton">
+          <button class="peremestit" type="button" @click="returnCard" :disabled="!reason">Вернуть</button>
+          <input type="text" v-model="reason" placeholder="Введите причину возврата" />
+        </template>
+        <template v-if="showAddReason">
+          <add-reason :card="card" @add-reason="addReason"></add-reason>
+        </template>
+      </div>
+      <card-edit v-if="card.completed === null" :card="card"></card-edit>
+    </div>
+  `,
     data() {
         return {
-            reason: ''
+            reason: '',
+            clickedReason: null
         };
     },
     props: {
@@ -288,14 +308,14 @@ Vue.component('card-form', {
         edit: Boolean,
         last: Boolean,
         del: Boolean,
-        column: Number, 
+        column: Number
     },
     computed: {
         showReturnButton() {
-            return !this.edit && this.card.completed === null && this.column === 3; 
+            return !this.edit && this.card.completed === null && this.column === 3;
         },
         showAddReason() {
-            return this.last && this.card.completed === null && this.column === 3; 
+            return this.last && this.card.completed === null && this.column === 3;
         }
     },
     methods: {
@@ -306,13 +326,17 @@ Vue.component('card-form', {
             this.$emit('delete-card', this.card);
         },
         addReason(reason) {
-            this.card.reason.push(reason);
+            this.card.reason = [reason];
         },
         returnCard() {
             if (this.reason) {
                 this.$emit('return-card', this.card, this.reason);
                 this.reason = '';
             }
+        },
+        toggleReason(reason) {
+            this.clickedReason = this.clickedReason === reason ? null : reason;
+            console.log("sdas");
         }
     }
 });
